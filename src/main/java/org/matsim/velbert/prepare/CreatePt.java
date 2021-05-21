@@ -28,9 +28,9 @@ import java.util.stream.Collectors;
 )
 public class CreatePt implements MATSimAppCommand {
     private static final String schedule = "projects/matsim-velbert/raw-input/gtfs/2021_04_29_vvr_gtfs.zip";
-    private static final String transitSchedule = "projects/matsim-velbert/matsim-input/matsim-velbert-1.0/matsim-verlbert-1.0.transit-schedule.xml.gz";
-    private static final String transitVehicles = "projects/matsim-velbert/matsim-input/matsim-velbert-1.0/matsim-verlbert-1.0.transit-vehicles.xml.gz";
-    private static final String inputNetwork = "projects/matsim-velbert/matsim-input/matsim-velbert-1.0/matsim-verlbert-1.0.network.xml.gz";
+    private static final String transitSchedule = "projects/matsim-velbert/matsim-input/matsim-velbert-1.0/matsim-velbert-1.0.transit-schedule.xml.gz";
+    private static final String transitVehicles = "projects/matsim-velbert/matsim-input/matsim-velbert-1.0/matsim-velbert-1.0.transit-vehicles.xml.gz";
+    private static final String inputNetwork = "projects/matsim-velbert/matsim-input/matsim-velbert-1.0/matsim-velbert-1.0.network.xml.gz";
 
     @CommandLine.Option(names = "--sharedSvn", description = "path to shared svn root folder")
     private String sharedSvn = "bla";

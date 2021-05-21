@@ -6,6 +6,7 @@ import org.apache.log4j.Logger;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.prep.PreparedGeometry;
 import org.locationtech.jts.geom.prep.PreparedGeometryFactory;
+import org.matsim.api.core.v01.TransportMode;
 import org.matsim.application.MATSimAppCommand;
 import org.matsim.contrib.osm.networkReader.LinkProperties;
 import org.matsim.contrib.osm.networkReader.SupersonicOsmNetworkReader;
@@ -21,6 +22,7 @@ import picocli.CommandLine;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -37,7 +39,7 @@ public class CreateNetwork implements MATSimAppCommand {
     private static final String germanyOsmFile = "projects/matsim-velbert/raw-input/osm/germany-20210521.osm.pbf";
     private static final String scenarioRegionShapeFile ="projects/matsim-velbert/matsim-input/matsim-velbert-snz-original/dilutionArea.shp";
 
-    private static final String outputFile = "projects/matsim-velbert/matsim-input/matsim-velbert-1.0/matsim-verlbert-1.0.network.xml.gz";
+    private static final String outputFile = "projects/matsim-velbert/matsim-input/matsim-velbert-1.0/matsim-velbert-1.0.network.xml.gz";
 
     @CommandLine.Option(names = "--sharedSvn", description = "path to shared svn root folder")
     private String sharedSvn;
@@ -50,6 +52,7 @@ public class CreateNetwork implements MATSimAppCommand {
     public Integer call() {
 
         var svn = Paths.get(sharedSvn);
+        var allowedModes = Set.of(TransportMode.car, TransportMode.ride, TransportMode.bike);
 
         var coarseLinkProperties = LinkProperties.createLinkProperties().entrySet().stream()
                 .filter(entry -> entry.getValue().getHierarchyLevel() <= LinkProperties.LEVEL_PRIMARY)
@@ -59,6 +62,7 @@ public class CreateNetwork implements MATSimAppCommand {
         var coarseNetwork = new SupersonicOsmNetworkReader.Builder()
                 .setCoordinateTransformation(transformation)
                 .setLinkProperties(coarseLinkProperties)
+                .setAfterLinkCreated((link, map, direction) -> link.setAllowedModes(allowedModes))
                 .build()
                 .read(svn.resolve(germanyOsmFile));
 
