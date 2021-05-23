@@ -7,8 +7,10 @@ import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.prep.PreparedGeometry;
 import org.locationtech.jts.geom.prep.PreparedGeometryFactory;
 import org.matsim.api.core.v01.TransportMode;
+import org.matsim.api.core.v01.network.Link;
 import org.matsim.application.MATSimAppCommand;
 import org.matsim.contrib.osm.networkReader.LinkProperties;
+import org.matsim.contrib.osm.networkReader.OsmTags;
 import org.matsim.contrib.osm.networkReader.SupersonicOsmNetworkReader;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.algorithms.NetworkCleaner;
@@ -35,6 +37,9 @@ public class CreateNetwork implements MATSimAppCommand {
 
     private static final Logger log = LogManager.getLogger(CreateNetwork.class);
     private static final CoordinateTransformation transformation = TransformationFactory.getCoordinateTransformation("EPSG:4326", "EPSG:25832");
+    private static final Set<String> carRideBike = Set.of(TransportMode.car, TransportMode.ride, TransportMode.bike);
+    private static final Set<String> carRide = Set.of(TransportMode.car, TransportMode.ride);
+
     private static final String nrwOsmFile = "projects/matsim-velbert/raw-input/osm/nordrhein-westfalen-20210521.osm.pbf";
     private static final String germanyOsmFile = "projects/matsim-velbert/raw-input/osm/germany-20210521.osm.pbf";
     private static final String scenarioRegionShapeFile ="projects/matsim-velbert/matsim-input/matsim-velbert-snz-original/dilutionArea.shp";
@@ -52,7 +57,6 @@ public class CreateNetwork implements MATSimAppCommand {
     public Integer call() {
 
         var svn = Paths.get(sharedSvn);
-        var allowedModes = Set.of(TransportMode.car, TransportMode.ride, TransportMode.bike);
 
         var coarseLinkProperties = LinkProperties.createLinkProperties().entrySet().stream()
                 .filter(entry -> entry.getValue().getHierarchyLevel() <= LinkProperties.LEVEL_PRIMARY)
@@ -62,7 +66,7 @@ public class CreateNetwork implements MATSimAppCommand {
         var coarseNetwork = new SupersonicOsmNetworkReader.Builder()
                 .setCoordinateTransformation(transformation)
                 .setLinkProperties(coarseLinkProperties)
-                .setAfterLinkCreated((link, map, direction) -> link.setAllowedModes(allowedModes))
+                .setAfterLinkCreated((link, tags, direction) -> setAllowedMode(link, tags))
                 .build()
                 .read(svn.resolve(germanyOsmFile));
 
@@ -84,6 +88,7 @@ public class CreateNetwork implements MATSimAppCommand {
 
                     return geometry.covers(MGC.coord2Point(coord));
                 })
+                .setAfterLinkCreated((link, tags, direction) -> setAllowedMode(link, tags))
                 .build()
                 .read(svn.resolve(nrwOsmFile));
 
@@ -110,5 +115,20 @@ public class CreateNetwork implements MATSimAppCommand {
 
         var factory = new PreparedGeometryFactory();
         return factory.create(geometry);
+    }
+
+    private void setAllowedMode(Link link, Map<String, String> tags) {
+
+        if (isCarOnly(tags)) {
+            link.setAllowedModes(carRide);
+        } else {
+            link.setAllowedModes(carRideBike);
+        }
+    }
+
+    private boolean isCarOnly (Map<String, String> tags) {
+
+        var highwayType = tags.get(OsmTags.HIGHWAY);
+        return highwayType == null || highwayType.equals(OsmTags.MOTORWAY) || highwayType.equals(OsmTags.MOTORWAY_LINK) || highwayType.equals(OsmTags.TRUNK) || highwayType.equals(OsmTags.TRUNK_LINK);
     }
 }

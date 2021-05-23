@@ -32,9 +32,9 @@ public class RunVelbert {
                     .setOpeningTime(6. * 3600.).setClosingTime(20. * 3600.));
             config.planCalcScore().addActivityParams(new PlanCalcScoreConfigGroup.ActivityParams("leisure_" + ii + ".0").setTypicalDuration(ii)
                     .setOpeningTime(9. * 3600.).setClosingTime(27. * 3600.));
-            config.planCalcScore().addActivityParams(new PlanCalcScoreConfigGroup.ActivityParams("shop_daily" + ii + ".0").setTypicalDuration(ii)
+            config.planCalcScore().addActivityParams(new PlanCalcScoreConfigGroup.ActivityParams("shop_daily_" + ii + ".0").setTypicalDuration(ii)
                     .setOpeningTime(8. * 3600.).setClosingTime(20. * 3600.));
-            config.planCalcScore().addActivityParams(new PlanCalcScoreConfigGroup.ActivityParams("shop_other" + ii + ".0").setTypicalDuration(ii)
+            config.planCalcScore().addActivityParams(new PlanCalcScoreConfigGroup.ActivityParams("shop_other_" + ii + ".0").setTypicalDuration(ii)
                     .setOpeningTime(8. * 3600.).setClosingTime(20. * 3600.));
         }
 

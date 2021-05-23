@@ -46,7 +46,11 @@ $(VEHICLES):
 	java -jar $(JAR) prepare vehicle-types\
 	 --sharedSvn $(SHARED-SVN)
 
+network:  $(NETWORK)
+population: $(POPULATION)
+vehicles: $(VEHICLES)
+
 # aggregate target
-prepare: $(NETWORK) $(POPULATION) $(VEHICLES)
+prepare: network population vehicles
 	rm $(TMP_POPOULATION)
 	@echo "Done"
