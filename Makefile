@@ -1,7 +1,7 @@
 SHARED-SVN := C:/Users/Janekdererste/repos/shared-svn
-VERSION := matsim-velbert-1.0
+VERSION := matsim-velbert-v1.0
 OUTPUT_FOLDER := projects/matsim-velbert/matsim-input/$(VERSION)
-JAR := velbert-0.0.1-SNAPSHOT.jar
+JAR := matsim-velbert-0.0.1-SNAPSHOT.jar
 SNZ_SCENARIO := $(SHARED-SVN)/projects/matsim-velbert/matsim-input/matsim-velbert-snz-original
 RAW_INPUT := $(SHARED-SVN)/projects/matsim-velbert/raw-input/
 
@@ -17,9 +17,9 @@ $(JAR):
 
 # create network
 $(NETWORK): $(JAR)
-	java -Xmx20G -jar $(JAR)  prepare network --sharedSvn $(SHARED-SVN)\
+	java -Xmx20G -jar $(JAR)  prepare network --sharedSvn $(SHARED-SVN)
 
-	java -jar $(JAR) prepare pt --sharedSvn $(SHARED-SVN)\
+	java -jar $(JAR) prepare pt --sharedSvn $(SHARED-SVN)
 
 # do population stuff
 $(POPULATION): $(JAR)
@@ -29,6 +29,10 @@ $(POPULATION): $(JAR)
 	 --population $(SNZ_SCENARIO)/population.xml.gz\
 	 --attributes $(SNZ_SCENARIO)/personAttributes.xml.gz\
 	 --output $(SHARED-SVN)/$(OUTPUT_FOLDER)\
+
+# filter population to the area of NRW for the matsim class. If real stuies are run, this should propbably be taken out
+	 java -jar $(JAR) prepare filter-population\
+ 	  --sharedSvn $(SHARED-SVN)
 
 	java -jar $(JAR) prepare resolve-grid-coords\
 	 $(TMP_POPULATION)\
@@ -46,7 +50,7 @@ $(VEHICLES):
 	java -jar $(JAR) prepare vehicle-types\
 	 --sharedSvn $(SHARED-SVN)
 
-network:  $(NETWORK)
+network: $(NETWORK)
 population: $(POPULATION)
 vehicles: $(VEHICLES)
 

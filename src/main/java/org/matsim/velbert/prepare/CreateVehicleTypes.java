@@ -17,7 +17,7 @@ import java.nio.file.Paths;
 )
 public class CreateVehicleTypes implements MATSimAppCommand {
 
-    private static final String vehiclesFile = "projects/matsim-velbert/matsim-input/matsim-velbert-1.0/matsim-velbert-1.0.vehicles.xml.gz";
+    private static final String vehiclesFile = "projects/matsim-velbert/matsim-input/matsim-velbert-v1.0/matsim-velbert-v1.0.vehicles.xml.gz";
 
     @CommandLine.Option(names = "--sharedSvn", description = "path to shared svn root folder")
     private String sharedSvn;

@@ -23,7 +23,7 @@ import java.nio.file.Paths;
 public class CleanPopulation implements MATSimAppCommand {
 
     private static final Logger log = Logger.getLogger(CleanPopulation.class);
-    private static final String populationFile = "projects/matsim-velbert/matsim-input/matsim-velbert-1.0/tmp-25pct.plans.xml.gz";
+    private static final String populationFile = "projects/matsim-velbert/matsim-input/matsim-velbert-v1.0/tmp-25pct.plans.xml.gz";
 
     @CommandLine.Option(names = "--sharedSvn", description = "path to shared svn root folder")
     private String sharedSvn;

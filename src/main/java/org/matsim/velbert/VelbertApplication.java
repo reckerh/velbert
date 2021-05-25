@@ -7,10 +7,7 @@ import org.matsim.application.prepare.population.TrajectoryToPlans;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
 import org.matsim.core.config.groups.PlansCalcRouteConfigGroup;
-import org.matsim.velbert.prepare.CleanPopulation;
-import org.matsim.velbert.prepare.CreateNetwork;
-import org.matsim.velbert.prepare.CreatePt;
-import org.matsim.velbert.prepare.CreateVehicleTypes;
+import org.matsim.velbert.prepare.*;
 import picocli.CommandLine;
 
 import java.util.List;
@@ -18,7 +15,7 @@ import java.util.List;
 @CommandLine.Command(header = ":: Open Velbert Scenario ::", version="1.0")
 @MATSimApplication.Prepare({
         CreateNetwork.class, CreatePt.class, TrajectoryToPlans.class, ResolveGridCoordinates.class,
-        DownSamplePopulation.class, CleanPopulation.class, CreateVehicleTypes.class
+        DownSamplePopulation.class, CleanPopulation.class, CreateVehicleTypes.class, ShapePopulationFilter.class
 })
 public class VelbertApplication extends MATSimApplication {
 
