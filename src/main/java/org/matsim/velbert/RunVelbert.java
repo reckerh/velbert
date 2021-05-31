@@ -74,16 +74,8 @@ public class RunVelbert {
             }
         });
 
-        config.controler().setLastIteration(0);
-
+        // create modal share analysis
         var dilutionArea = getDilutionArea();
-        var numberOfPersonsInFilter = scenario.getPopulation().getPersons().values().stream()
-                .map(HasPlansAndId::getSelectedPlan)
-                .map(plan -> TripStructureUtils.getActivities(plan, TripStructureUtils.StageActivityHandling.ExcludeStageActivities).get(0))
-                .filter(home -> dilutionArea.stream().anyMatch(geometry -> geometry.covers(MGC.coord2Point(home.getCoord()))))
-                .collect(Collectors.toSet()).size();
-
-
         var analyzerModule = new TripAnalyzerModule(personId -> {
             var person = scenario.getPopulation().getPersons().get(personId);
             var firstActivity = TripStructureUtils.getActivities(person.getSelectedPlan(), TripStructureUtils.StageActivityHandling.ExcludeStageActivities).get(0);
