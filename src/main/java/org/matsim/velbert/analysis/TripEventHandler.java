@@ -13,6 +13,7 @@ import org.matsim.api.core.v01.events.handler.PersonDepartureEventHandler;
 import org.matsim.api.core.v01.events.handler.TransitDriverStartsEventHandler;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Person;
+import org.matsim.core.config.ReflectiveConfigGroup;
 import org.matsim.core.utils.geometry.CoordUtils;
 
 import java.util.*;
@@ -113,6 +114,14 @@ public class TripEventHandler implements ActivityEndEventHandler, ActivityStartE
 
         public String getMode() {
             return mode;
+        }
+
+        public Coord getStartCoord() {
+            return startCoord;
+        }
+
+        public Coord getEndCoord() {
+            return endCoord;
         }
     }
 }
