@@ -16,6 +16,7 @@ import org.matsim.core.controler.events.AfterMobsimEvent;
 import org.matsim.core.controler.events.BeforeMobsimEvent;
 import org.matsim.core.controler.listener.AfterMobsimListener;
 import org.matsim.core.controler.listener.BeforeMobsimListener;
+import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.scoring.ExperiencedPlansService;
 import org.matsim.core.utils.collections.Tuple;
 
@@ -148,10 +149,9 @@ public class TripAnalyzerModule extends AbstractModule {
             var modes = List.of(TransportMode.car, TransportMode.ride, TransportMode.pt, TransportMode.bike, TransportMode.walk);
 
 
-
             log.info("-------------------------------------------------------------------- Trip Analyzer Module -----------------------------------------------------------------------");
 
-            try (var writer = Files.newBufferedWriter(filename); var printer = CSVFormat.DEFAULT.withDelimiter(';').withHeader("mode", "distance", "value", "shareOfDistance").print(writer)) {
+            try (var writer = Files.newBufferedWriter(filename); var printer = CSVFormat.DEFAULT.withDelimiter(';').withHeader("distance", "mode", "value", "shareOfDistance").print(writer)) {
 
                 //print values
                 for(var mode : modes) {
@@ -166,7 +166,7 @@ public class TripAnalyzerModule extends AbstractModule {
                         var share = (double)distanceAndModeValue/totalNumberForDistance;
                         log.info(mode + ", " + distanceClass + ": " + distanceAndModeValue + ", " + totalNumberForDistance + ", " + share);
 
-                        printer.printRecord(mode, distanceClass, distanceAndModeValue, share);
+                        printer.printRecord(distanceClass, mode, distanceAndModeValue, share);
                     }
                 }
             } catch (IOException e) {
