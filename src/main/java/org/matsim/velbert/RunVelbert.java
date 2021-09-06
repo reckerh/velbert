@@ -1,18 +1,41 @@
 package org.matsim.velbert;
 
+import org.geotools.geometry.jts.JTS;
+import org.geotools.referencing.CRS;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.prep.PreparedGeometry;
+import org.locationtech.jts.geom.prep.PreparedGeometryFactory;
 import org.matsim.api.core.v01.TransportMode;
+import org.matsim.api.core.v01.population.HasPlansAndId;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
 import org.matsim.core.config.groups.PlansCalcRouteConfigGroup;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
+import org.matsim.core.router.TripStructureUtils;
 import org.matsim.core.scenario.ScenarioUtils;
+import org.matsim.core.utils.geometry.CoordinateTransformation;
+import org.matsim.core.utils.geometry.geotools.MGC;
+import org.matsim.core.utils.geometry.transformations.TransformationFactory;
+import org.matsim.core.utils.gis.ShapeFileReader;
+import org.matsim.velbert.analysis.TripAnalyzerModule;
+import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.operation.MathTransform;
+import org.opengis.referencing.operation.TransformException;
 
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class RunVelbert {
 
-    public static void main(String[] args) {
+    private static final String shapeFile = "https://svn.vsp.tu-berlin.de/repos/public-svn/matsim/scenarios/countries/de/velbert/velbert-v1.0/shapes/Postleitzahlengebiete-shp/OSM_PLZ_072019.shp";
+    private static final Set<String> zipCodes = Set.of("42551", "42549", "42555", "42553");
+
+    public static void main(String[] args) throws MalformedURLException, FactoryException {
 
         var config = ConfigUtils.loadConfig(args);
 
@@ -51,6 +74,40 @@ public class RunVelbert {
             }
         });
 
+        // create modal share analysis
+        var dilutionArea = getDilutionArea();
+        var analyzerModule = new TripAnalyzerModule(personId -> {
+            var person = scenario.getPopulation().getPersons().get(personId);
+            var firstActivity = TripStructureUtils.getActivities(person.getSelectedPlan(), TripStructureUtils.StageActivityHandling.ExcludeStageActivities).get(0);
+            return dilutionArea.stream().anyMatch(geometry -> geometry.covers(MGC.coord2Point(firstActivity.getCoord())));
+        });
+        controler.addOverridingModule(analyzerModule);
+
         controler.run();
+    }
+
+    private static Collection<PreparedGeometry> getDilutionArea() throws FactoryException, MalformedURLException {
+
+        var factory = new PreparedGeometryFactory();
+        var fromCRS = CRS.decode("EPSG:3857");
+        var toCRS = CRS.decode("EPSG:25832");
+        var transformation = CRS.findMathTransform(fromCRS, toCRS);
+
+        var uri = URI.create(shapeFile);
+        return ShapeFileReader.getAllFeatures(uri.toURL()).stream()
+                .filter(simpleFeature -> zipCodes.contains((String) simpleFeature.getAttribute("plz")))
+                .map(simpleFeature -> (Geometry) simpleFeature.getDefaultGeometry())
+                .map(geometry -> transform(geometry, transformation))
+                .map(factory::create)
+                .collect(Collectors.toSet());
+
+    }
+
+    private static Geometry transform(Geometry geometry, MathTransform transform) {
+        try {
+            return JTS.transform(geometry, transform);
+        } catch (TransformException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
